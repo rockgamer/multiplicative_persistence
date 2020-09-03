@@ -10,17 +10,17 @@ uint_fast16_t const constexpr prime[256]={2,3,5,7,11,13,17,19,23,29,31,37,41,43,
 
 uint_fast16_t inline depth(std::vector<std::pair<uint_fast64_t,uint_fast64_t>> pc, uint_fast64_t base){
 		uint_fast16_t d=1;
-		boost::multiprecision::uint1024_t n=1;
+		boost::multiprecision::cpp_int n=1;
 	
 		for(uint_fast32_t i=0;i<pc.size();i++){
-			boost::multiprecision::uint1024_t ni=pc[i].first;
+			boost::multiprecision::cpp_int ni=pc[i].first;
 			for(uint_fast32_t j=0;j<pc[i].second;j++) n=n*ni;
 		}
 
-		boost::multiprecision::uint1024_t nit=n;
+		boost::multiprecision::cpp_int nit=n;
 				
 	do{
-		boost::multiprecision::uint1024_t product=1;
+		boost::multiprecision::cpp_int product=1;
 		while(nit!=0){
 			product=product*(nit%base);
 			nit=nit/base;
@@ -33,13 +33,13 @@ uint_fast16_t inline depth(std::vector<std::pair<uint_fast64_t,uint_fast64_t>> p
 }
 
 int main(int argc, char* argv[]){
-	uint_fast32_t const N=100;
+	uint_fast32_t const N=256;
 	uint_fast32_t const Nthreads=omp_get_max_threads();
 
 	omp_set_dynamic(0);
 	omp_set_num_threads(Nthreads);
 
-	for(uint_fast64_t base=4;base<16;base++){
+	for(uint_fast64_t base=4;base<65;base++){
 		uint_fast16_t max=0;
 		std::vector<std::pair<uint_fast64_t,uint_fast64_t>> pc_;
 	
@@ -79,7 +79,7 @@ int main(int argc, char* argv[]){
 				tmp=tmp/N;
 			}	
 		}
-		std::cout << base << '\t' << max << std::endl;
+		std::cout << base << '\t' << list.size() << '\t' << max << std::endl;
 		for(uint_fast16_t i=0;i<list.size();i++){
 			for(uint_fast16_t j=0;j<list[i].size()-1;j++) std::cout << list[i][j].first << ' ' << list[i][j].second << ", ";
 			std::cout << list[i][list[i].size()-1].first << ' ' << list[i][list[i].size()-1].second << std::endl;
