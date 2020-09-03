@@ -13,7 +13,7 @@ uint_fast16_t inline depth(std::vector<std::pair<uint_fast64_t,uint_fast64_t>> p
 		boost::multiprecision::uint1024_t n=1;
 	
 		for(uint_fast32_t i=0;i<pc.size();i++){
-			boost::multiprecision::uint1024_t ni=pc[i].first;
+			boost::multiprecision::uint102t ni=pc[i].first;
 			for(uint_fast32_t j=0;j<pc[i].second;j++) n=n*ni;
 		}
 
@@ -34,37 +34,55 @@ uint_fast16_t inline depth(std::vector<std::pair<uint_fast64_t,uint_fast64_t>> p
 
 int main(int argc, char* argv[]){
 	uint_fast32_t const N=100;
-	
-	#pragma omp parallel for
-	for(uint_fast64_t base=3;base<65;base++){
-		uint_fast16_t d,max=0;
-		std::vector<std::pair<uint_fast64_t,uint_fast64_t>> pc;
+	uint_fast32_t const Nthreads=omp_get_max_threads();
+
+	omp_set_dynamic(0);
+	omp_set_num_threads(Nthreads);
+
+	for(uint_fast64_t base=4;base<16;base++){
+		uint_fast16_t max=0;
+		std::vector<std::pair<uint_fast64_t,uint_fast64_t>> pc_;
 	
 		for(uint_fast16_t i=0;i<256;i++){
-			if(prime[i]<base) pc.push_back({prime[i],0});
+			if(prime[i]<base) pc_.push_back({prime[i],0});
 			else break;
 		}
 
-		uint_fast32_t total=1;
-		for(uint_fast32_t i=0; i<pc.size();i++) total=total*N;
+	
+		std::vector<std::vector<std::pair<uint_fast64_t,uint_fast64_t>>> pc;
+		for(uint_fast32_t i=0;i<Nthreads;i++) pc.push_back(pc_);
 
-		uint_fast32_t tmp;
+		uint_fast32_t total=1;
+		for(uint_fast32_t i=0; i<pc[0].size();i++) total=total*N;
+
+		std::vector<std::vector<std::pair<uint_fast64_t,uint_fast64_t>>> list;
+
+		#pragma omp parallel for 
 		for(uint_fast32_t i=0;i<total;i++){
-			d=depth(pc,base);
+			uint_fast32_t tid=omp_get_thread_num();
+			uint_fast32_t tmp;
+			uint_fast16_t d=depth(pc[tid],base);
+			
+			
+
 			if(d>=max){
-				max=d;
 				#pragma omp critical
 				{
-					std::cout << base << '\t' << max << '\t';
-					for(uint_fast32_t j=0;j<pc.size()-1;j++) std::cout << pc[j].first << ' ' << pc[j].second << ", ";
-					std::cout << pc[pc.size()-1].first << ' ' << pc[pc.size()-1].second << std::endl;
+					if(d>max){ list.clear();max=d;}
+					if(d>=max) list.push_back(pc[tid]);	
 				}
 			}
+
 			tmp=i;
-			for(uint_fast32_t j=0;j<pc.size();j++){
-				pc[j].second=tmp%N;
+			for(uint_fast32_t j=0;j<pc[tid].size();j++){
+				pc[tid][j].second=tmp%N;
 				tmp=tmp/N;
 			}	
+		}
+		std::cout << base << '\t' << max << std::endl;
+		for(uint_fast16_t i=0;i<list.size();i++){
+			for(uint_fast16_t j=0;j<list[i].size()-1;j++) std::cout << list[i][j].first << ' ' << list[i][j].second << ", ";
+			std::cout << list[i][list[i].size()-1].first << ' ' << list[i][list[i].size()-1].second << std::endl;
 		}
 		std::cout << std::endl;
 	}
