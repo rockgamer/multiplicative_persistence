@@ -13,7 +13,7 @@ uint_fast16_t inline depth(std::vector<std::pair<uint_fast64_t,uint_fast64_t>> p
 		boost::multiprecision::uint1024_t n=1;
 	
 		for(uint_fast32_t i=0;i<pc.size();i++){
-			boost::multiprecision::uint102t ni=pc[i].first;
+			boost::multiprecision::uint1024_t ni=pc[i].first;
 			for(uint_fast32_t j=0;j<pc[i].second;j++) n=n*ni;
 		}
 
