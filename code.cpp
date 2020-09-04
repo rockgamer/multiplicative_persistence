@@ -14,7 +14,7 @@ uint_fast16_t inline depth(std::vector<std::pair<uint_fast64_t,uint_fast64_t>> p
 	
 		for(uint_fast32_t i=0;i<pc.size();i++){
 			boost::multiprecision::cpp_int ni=pc[i].first;
-			for(uint_fast32_t j=0;j<pc[i].second;j++) n=n*ni;
+			n=n*boost::multiprecision::pow(ni,pc[i].second);
 		}
 
 		boost::multiprecision::cpp_int nit=n;
@@ -33,7 +33,7 @@ uint_fast16_t inline depth(std::vector<std::pair<uint_fast64_t,uint_fast64_t>> p
 }
 
 int main(int argc, char* argv[]){
-	uint_fast32_t const N=256;
+	uint_fast32_t const N=100;
 	uint_fast32_t const Nthreads=omp_get_max_threads();
 
 	omp_set_dynamic(0);
